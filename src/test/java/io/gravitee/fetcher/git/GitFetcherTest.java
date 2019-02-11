@@ -39,7 +39,7 @@ public class GitFetcherTest {
         gitFetcherConfiguration.setPath("README.md");
 
         GitFetcher gitFetcher = new GitFetcher(gitFetcherConfiguration);
-        InputStream is = gitFetcher.fetch();
+        InputStream is = gitFetcher.fetch().getContent();
         assertThat(is).isNotNull();
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
         String line;
@@ -60,7 +60,7 @@ public class GitFetcherTest {
         gitFetcherConfiguration.setPath("gravitee-gateway-api/pom.xml");
 
         GitFetcher gitFetcher = new GitFetcher(gitFetcherConfiguration);
-        InputStream is = gitFetcher.fetch();
+        InputStream is = gitFetcher.fetch().getContent();
         assertThat(is).isNotNull();
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
         String line;
@@ -83,7 +83,7 @@ public class GitFetcherTest {
         GitFetcher gitFetcher = new GitFetcher(gitFetcherConfiguration);
         InputStream is = null;
         try {
-            is = gitFetcher.fetch();
+            is = gitFetcher.fetch().getContent();
             fail("should not happen");
         } catch (FetcherException fetcherException) {
             assertThat(fetcherException.getMessage()).contains("Unable to fetch git content");
@@ -101,7 +101,7 @@ public class GitFetcherTest {
         GitFetcher gitFetcher = new GitFetcher(gitFetcherConfiguration);
         InputStream is = null;
         try {
-            is = gitFetcher.fetch();
+            is = gitFetcher.fetch().getContent();
             fail("should not happen");
         } catch (FetcherException fetcherException) {
             assertThat(fetcherException.getMessage()).contains("Unable to fetch git content");
@@ -119,7 +119,7 @@ public class GitFetcherTest {
         GitFetcher gitFetcher = new GitFetcher(gitFetcherConfiguration);
         InputStream is = null;
         try {
-            is = gitFetcher.fetch();
+            is = gitFetcher.fetch().getContent();
             fail("should not happen");
         } catch (FetcherException fetcherException) {
             assertThat(fetcherException.getMessage()).contains("Unable to fetch git content");
