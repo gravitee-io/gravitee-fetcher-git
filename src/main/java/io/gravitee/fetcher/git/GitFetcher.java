@@ -16,6 +16,7 @@
 package io.gravitee.fetcher.git;
 
 import io.gravitee.fetcher.api.Fetcher;
+import io.gravitee.fetcher.api.FetcherConfiguration;
 import io.gravitee.fetcher.api.FetcherException;
 import io.gravitee.fetcher.api.Resource;
 import org.eclipse.jgit.api.Git;
@@ -63,5 +64,10 @@ public class GitFetcher implements Fetcher{
             LOGGER.error(e.getMessage(), e);
             throw new FetcherException("Unable to fetch git content (" + e.getMessage() + ")", e);
         }
+    }
+
+    @Override
+    public FetcherConfiguration getConfiguration() {
+        return gitFetcherConfiguration;
     }
 }
