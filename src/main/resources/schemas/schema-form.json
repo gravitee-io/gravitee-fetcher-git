@@ -17,11 +17,28 @@
       "title": "Path",
       "description": "Path to the file to fetch",
       "type": "string"
+    },
+    "autoFetch": {
+      "title": "Auto Fetch",
+      "description": "Trigger periodic update",
+      "type": "boolean",
+      "default": false
+    },
+    "fetchCron": {
+      "title": "Update frequency",
+      "description": "Define update frequency using Crontab pattern.<BR><B>Note:</B> Platform administrator may have configure a max frequency that you cannot exceed",
+      "type": "string"
     }
   },
   "required": [
     "repository",
     "branchOrTag",
     "path"
-  ]
+  ],
+  "if": {
+    "properties": {
+      "autoFetch": { "const": true }
+    }
+  },
+  "then": { "required": ["fetchCron"] }
 }

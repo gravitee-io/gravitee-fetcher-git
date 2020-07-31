@@ -22,6 +22,7 @@ import io.gravitee.fetcher.api.Resource;
 import org.eclipse.jgit.api.Git;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.support.CronSequenceGenerator;
 
 import java.io.*;
 
@@ -40,6 +41,18 @@ public class GitFetcher implements Fetcher{
 
     @Override
     public Resource fetch() throws FetcherException {
+        if (gitFetcherConfiguration.isAutoFetch() && (gitFetcherConfiguration.getFetchCron() == null || gitFetcherConfiguration.getFetchCron().isEmpty())) {
+            throw new FetcherException("Some required configuration attributes are missing.", null);
+        }
+
+        if (gitFetcherConfiguration.isAutoFetch() && gitFetcherConfiguration.getFetchCron() != null) {
+            try {
+                new CronSequenceGenerator(gitFetcherConfiguration.getFetchCron());
+            } catch (IllegalArgumentException e) {
+                throw new FetcherException("Cron expression is invalid", e);
+            }
+        }
+
         File localPath = null;
         try {
             localPath = File.createTempFile("Gravitee-io", "");
@@ -47,6 +60,7 @@ public class GitFetcher implements Fetcher{
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
             throw new FetcherException("Unable to create temporary directory to fetch git repository", e);
+
         }
 
         try (Git result = Git.cloneRepository()
