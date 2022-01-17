@@ -11,7 +11,7 @@ parameters:
     description: "Run in dry run mode?"
 
 orbs:
-  gravitee: gravitee-io/gravitee@1.0
+  gravitee: gravitee-io/gravitee@1.0.44
 
 workflows:
   version: 2.1
