@@ -15,15 +15,14 @@
  */
 package io.gravitee.fetcher.git;
 
-import io.gravitee.fetcher.api.FetcherException;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
+import io.gravitee.fetcher.api.FetcherException;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import org.junit.Test;
 
 /**
  * @author Nicolas GERAUD (nicolas <AT> graviteesource.com)

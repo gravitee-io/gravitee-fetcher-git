@@ -74,5 +74,4 @@ public class GitFetcherConfiguration implements FetcherConfiguration {
     public void setPath(String path) {
         this.path = path;
     }
-
 }
