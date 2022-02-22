@@ -18,7 +18,7 @@ It's primarily used to fetch documentation.
 
 == Cautions
 This plugin is based on https://eclipse.org/jgit/[JGit].
-The current version of JGit (4.4.0.201606070830-r) doesn't support shallow clones (https://bugs.eclipse.org/bugs/show_bug.cgi?id=475615).
+The current version of JGit (5.1.0.201809111528-r) doesn't support shallow clones (https://bugs.eclipse.org/bugs/show_bug.cgi?id=475615).
 This means that the entire repository is cloned in a temporary folder.
 
 This could take some times and spaces on your device.
