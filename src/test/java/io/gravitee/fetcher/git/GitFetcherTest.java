@@ -33,9 +33,9 @@ public class GitFetcherTest {
     @Test
     public void shouldGetExistingFileWithBranch() throws Exception {
         GitFetcherConfiguration gitFetcherConfiguration = new GitFetcherConfiguration();
-        gitFetcherConfiguration.setRepository("https://github.com/gravitee-io/issues.git");
-        gitFetcherConfiguration.setBranchOrTag("master");
-        gitFetcherConfiguration.setPath("README.md");
+        gitFetcherConfiguration.setRepository("git://github.com/gravitee-io/gravitee-fetcher-api.git");
+        gitFetcherConfiguration.setBranchOrTag("1.4.x");
+        gitFetcherConfiguration.setPath("pom.xml");
 
         GitFetcher gitFetcher = new GitFetcher(gitFetcherConfiguration);
         InputStream is = gitFetcher.fetch().getContent();
@@ -48,15 +48,15 @@ public class GitFetcherTest {
             assertThat(line).isNotNull();
         }
         br.close();
-        assertThat(content).contains("Gravitee.io");
+        assertThat(content).contains("<name>Gravitee.io APIM - Fetcher - API</name>");
     }
 
     @Test
     public void shouldGetExistingFileWithTag() throws Exception {
         GitFetcherConfiguration gitFetcherConfiguration = new GitFetcherConfiguration();
-        gitFetcherConfiguration.setRepository("https://github.com/gravitee-io/gateway.git");
-        gitFetcherConfiguration.setBranchOrTag("0.1.0");
-        gitFetcherConfiguration.setPath("gravitee-gateway-api/pom.xml");
+        gitFetcherConfiguration.setRepository("git://github.com/gravitee-io/gravitee-fetcher-api.git");
+        gitFetcherConfiguration.setBranchOrTag("1.4.0");
+        gitFetcherConfiguration.setPath("pom.xml");
 
         GitFetcher gitFetcher = new GitFetcher(gitFetcherConfiguration);
         InputStream is = gitFetcher.fetch().getContent();
@@ -69,13 +69,13 @@ public class GitFetcherTest {
             assertThat(line).isNotNull();
         }
         br.close();
-        assertThat(content).contains("gravitee-gateway-api");
+        assertThat(content).contains("<version>1.4.0</version>");
     }
 
     @Test
     public void shouldGetInexistingPath() throws Exception {
         GitFetcherConfiguration gitFetcherConfiguration = new GitFetcherConfiguration();
-        gitFetcherConfiguration.setRepository("https://github.com/gravitee-io/issues.git");
+        gitFetcherConfiguration.setRepository("git://github.com/gravitee-io/gravitee-fetcher-api.git");
         gitFetcherConfiguration.setBranchOrTag("master");
         gitFetcherConfiguration.setPath("unknown");
 
@@ -93,7 +93,7 @@ public class GitFetcherTest {
     @Test
     public void shouldGetInexistingRepo() throws Exception {
         GitFetcherConfiguration gitFetcherConfiguration = new GitFetcherConfiguration();
-        gitFetcherConfiguration.setRepository("https://unknown/gravitee-io/issues.git");
+        gitFetcherConfiguration.setRepository("git://unknown/gravitee-io/gravitee-fetcher-api.git");
         gitFetcherConfiguration.setBranchOrTag("master");
         gitFetcherConfiguration.setPath("README.md");
 
@@ -111,7 +111,7 @@ public class GitFetcherTest {
     @Test
     public void shouldGetInexistingBranch() throws Exception {
         GitFetcherConfiguration gitFetcherConfiguration = new GitFetcherConfiguration();
-        gitFetcherConfiguration.setRepository("https://github.com/gravitee-io/issues.git");
+        gitFetcherConfiguration.setRepository("git://github.com/gravitee-io/gravitee-fetcher-api.git");
         gitFetcherConfiguration.setBranchOrTag("munster");
         gitFetcherConfiguration.setPath("README.md");
 
