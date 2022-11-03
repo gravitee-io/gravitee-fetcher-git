@@ -24,7 +24,7 @@
     <parent>
         <groupId>io.gravitee</groupId>
         <artifactId>gravitee-parent</artifactId>
-        <version>15</version>
+        <version>20.5</version>
     </parent>
 
     <groupId>io.gravitee.fetcher</groupId>
@@ -34,14 +34,26 @@
     <name>Gravitee.io APIM - Fetcher - GIT</name>
 
     <properties>
+        <gravitee-bom.version>2.8</gravitee-bom.version>
         <gravitee-fetcher-api.version>1.4.0</gravitee-fetcher-api.version>
-        <maven-assembly-plugin.version>2.5.5</maven-assembly-plugin.version>
-        <junit.version>4.13.1</junit.version>
-        <assertj-core.version>3.5.1</assertj-core.version>
-        <org.eclipse.jgit.version>5.1.0.201809111528-r</org.eclipse.jgit.version>
+        <maven-assembly-plugin.version>3.4.1</maven-assembly-plugin.version>
+        <org.eclipse.jgit.version>6.3.0.202209071007-r</org.eclipse.jgit.version>
         <!-- Property used by the publication job in CI-->
         <publish-folder-path>graviteeio-apim/plugins/fetchers</publish-folder-path>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Import bom to properly inherit all dependencies -->
+            <dependency>
+                <groupId>io.gravitee</groupId>
+                <artifactId>gravitee-bom</artifactId>
+                <version>${gravitee-bom.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -59,7 +71,6 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>${spring.version}</version>
             <scope>provided</scope>
             <exclusions>
                 <exclusion>
@@ -72,14 +83,11 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <!-- use 2.5.0 for Java 7 projects -->
-            <version>${assertj-core.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
