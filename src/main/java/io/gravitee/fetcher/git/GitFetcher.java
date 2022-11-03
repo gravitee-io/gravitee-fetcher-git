@@ -23,7 +23,7 @@ import java.io.*;
 import org.eclipse.jgit.api.Git;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.support.CronSequenceGenerator;
+import org.springframework.scheduling.support.CronExpression;
 
 /**
  * @author Nicolas GERAUD (nicolas <AT> graviteesource.com)
@@ -31,8 +31,8 @@ import org.springframework.scheduling.support.CronSequenceGenerator;
  */
 public class GitFetcher implements Fetcher {
 
-    private final Logger LOGGER = LoggerFactory.getLogger(GitFetcher.class);
-    private GitFetcherConfiguration gitFetcherConfiguration;
+    private static final Logger LOGGER = LoggerFactory.getLogger(GitFetcher.class);
+    private final GitFetcherConfiguration gitFetcherConfiguration;
 
     public GitFetcher(GitFetcherConfiguration gitFetcherConfiguration) {
         this.gitFetcherConfiguration = gitFetcherConfiguration;
@@ -49,13 +49,13 @@ public class GitFetcher implements Fetcher {
 
         if (gitFetcherConfiguration.isAutoFetch() && gitFetcherConfiguration.getFetchCron() != null) {
             try {
-                new CronSequenceGenerator(gitFetcherConfiguration.getFetchCron());
+                CronExpression.parse(gitFetcherConfiguration.getFetchCron());
             } catch (IllegalArgumentException e) {
                 throw new FetcherException("Cron expression is invalid", e);
             }
         }
 
-        File localPath = null;
+        File localPath;
         try {
             localPath = File.createTempFile("Gravitee-io", "");
             localPath.delete();
@@ -76,7 +76,7 @@ public class GitFetcher implements Fetcher {
             File fileToFetch = new File(
                 result.getRepository().getWorkTree().getAbsolutePath() + File.separatorChar + gitFetcherConfiguration.getPath()
             );
-            result.close();
+
             final Resource resource = new Resource();
             resource.setContent(new FileInputStream(fileToFetch));
             return resource;

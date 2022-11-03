@@ -28,13 +28,13 @@ import org.junit.Test;
  * @author Nicolas GERAUD (nicolas <AT> graviteesource.com)
  * @author GraviteeSource Team
  */
-public class GitFetcherTest {
+public class GitFetcherIntegrationTest {
 
     @Test
     public void shouldGetExistingFileWithBranch() throws Exception {
         GitFetcherConfiguration gitFetcherConfiguration = new GitFetcherConfiguration();
-        gitFetcherConfiguration.setRepository("git://github.com/gravitee-io/gravitee-fetcher-api.git");
-        gitFetcherConfiguration.setBranchOrTag("1.4.x");
+        gitFetcherConfiguration.setRepository("https://github.com/gravitee-io/gravitee-fetcher-git");
+        gitFetcherConfiguration.setBranchOrTag("master");
         gitFetcherConfiguration.setPath("pom.xml");
 
         GitFetcher gitFetcher = new GitFetcher(gitFetcherConfiguration);
@@ -42,19 +42,19 @@ public class GitFetcherTest {
         assertThat(is).isNotNull();
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
         String line;
-        String content = "";
+        StringBuilder content = new StringBuilder();
         while ((line = br.readLine()) != null) {
-            content += line;
+            content.append(line);
             assertThat(line).isNotNull();
         }
         br.close();
-        assertThat(content).contains("<name>Gravitee.io APIM - Fetcher - API</name>");
+        assertThat(content.toString()).contains("<name>Gravitee.io APIM - Fetcher - GIT</name>");
     }
 
     @Test
     public void shouldGetExistingFileWithTag() throws Exception {
         GitFetcherConfiguration gitFetcherConfiguration = new GitFetcherConfiguration();
-        gitFetcherConfiguration.setRepository("git://github.com/gravitee-io/gravitee-fetcher-api.git");
+        gitFetcherConfiguration.setRepository("https://github.com/gravitee-io/gravitee-fetcher-git");
         gitFetcherConfiguration.setBranchOrTag("1.4.0");
         gitFetcherConfiguration.setPath("pom.xml");
 
@@ -63,19 +63,19 @@ public class GitFetcherTest {
         assertThat(is).isNotNull();
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
         String line;
-        String content = "";
+        StringBuilder content = new StringBuilder();
         while ((line = br.readLine()) != null) {
-            content += line;
+            content.append(line);
             assertThat(line).isNotNull();
         }
         br.close();
-        assertThat(content).contains("<version>1.4.0</version>");
+        assertThat(content.toString()).contains("<version>1.4.0</version>");
     }
 
     @Test
-    public void shouldGetInexistingPath() throws Exception {
+    public void shouldGetInexistingPath() {
         GitFetcherConfiguration gitFetcherConfiguration = new GitFetcherConfiguration();
-        gitFetcherConfiguration.setRepository("git://github.com/gravitee-io/gravitee-fetcher-api.git");
+        gitFetcherConfiguration.setRepository("https://github.com/gravitee-io/gravitee-fetcher-git");
         gitFetcherConfiguration.setBranchOrTag("master");
         gitFetcherConfiguration.setPath("unknown");
 
@@ -91,7 +91,7 @@ public class GitFetcherTest {
     }
 
     @Test
-    public void shouldGetInexistingRepo() throws Exception {
+    public void shouldGetInexistingRepo() {
         GitFetcherConfiguration gitFetcherConfiguration = new GitFetcherConfiguration();
         gitFetcherConfiguration.setRepository("git://unknown/gravitee-io/gravitee-fetcher-api.git");
         gitFetcherConfiguration.setBranchOrTag("master");
@@ -109,9 +109,9 @@ public class GitFetcherTest {
     }
 
     @Test
-    public void shouldGetInexistingBranch() throws Exception {
+    public void shouldGetInexistingBranch() {
         GitFetcherConfiguration gitFetcherConfiguration = new GitFetcherConfiguration();
-        gitFetcherConfiguration.setRepository("git://github.com/gravitee-io/gravitee-fetcher-api.git");
+        gitFetcherConfiguration.setRepository("https://github.com/gravitee-io/gravitee-fetcher-git");
         gitFetcherConfiguration.setBranchOrTag("munster");
         gitFetcherConfiguration.setPath("README.md");
 
