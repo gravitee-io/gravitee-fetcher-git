@@ -20,6 +20,8 @@ import io.gravitee.fetcher.api.FetcherConfiguration;
 import io.gravitee.fetcher.api.FetcherException;
 import io.gravitee.fetcher.api.Resource;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import org.eclipse.jgit.api.Git;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,34 +57,49 @@ public class GitFetcher implements Fetcher {
             }
         }
 
-        File localPath;
+        File tmpDirectory;
         try {
-            localPath = File.createTempFile("Gravitee-io", "");
-            localPath.delete();
+            tmpDirectory = File.createTempFile("Gravitee-io", "");
+            tmpDirectory.delete();
         } catch (IOException e) {
-            LOGGER.error(e.getMessage(), e);
             throw new FetcherException("Unable to create temporary directory to fetch git repository", e);
         }
 
+        File fileToFetch;
+        final Resource resource = new Resource();
         try (
             Git result = Git
                 .cloneRepository()
                 .setURI(this.gitFetcherConfiguration.getRepository())
-                .setDirectory(localPath)
+                .setDirectory(tmpDirectory)
                 .setBranch(this.gitFetcherConfiguration.getBranchOrTag())
                 .call()
         ) {
             LOGGER.debug("Having repository: {}", result.getRepository().getDirectory());
-            File fileToFetch = new File(
-                result.getRepository().getWorkTree().getAbsolutePath() + File.separatorChar + gitFetcherConfiguration.getPath()
-            );
-
-            final Resource resource = new Resource();
+            fileToFetch =
+                new File(result.getRepository().getWorkTree().getAbsolutePath() + File.separatorChar + gitFetcherConfiguration.getPath());
             resource.setContent(new FileInputStream(fileToFetch));
-            return resource;
         } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
             throw new FetcherException("Unable to fetch git content (" + e.getMessage() + ")", e);
+        }
+
+        if (Files.isSymbolicLink(fileToFetch.toPath())) {
+            checkSymbolicLinkTargetIsInsideDirectory(fileToFetch, tmpDirectory);
+        }
+
+        return resource;
+    }
+
+    private static void checkSymbolicLinkTargetIsInsideDirectory(File symlink, File directory) throws FetcherException {
+        Path symlinkPath;
+        try {
+            symlinkPath = Files.readSymbolicLink(symlink.toPath()).toAbsolutePath();
+        } catch (IOException e) {
+            throw new FetcherException("A error occurred while trying to read symbolic link target", e);
+        }
+
+        if (!symlinkPath.startsWith(directory.toPath().toAbsolutePath())) {
+            throw new FetcherException("Accessing a file outside the Git repository using symbolic links is not allowed", null);
         }
     }
 
