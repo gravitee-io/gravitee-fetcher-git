@@ -73,6 +73,7 @@ public class GitFetcher implements Fetcher {
                 .setURI(this.gitFetcherConfiguration.getRepository())
                 .setDirectory(tmpDirectory)
                 .setBranch(this.gitFetcherConfiguration.getBranchOrTag())
+                .setDepth(1)
                 .call()
         ) {
             LOGGER.debug("Having repository: {}", result.getRepository().getDirectory());
