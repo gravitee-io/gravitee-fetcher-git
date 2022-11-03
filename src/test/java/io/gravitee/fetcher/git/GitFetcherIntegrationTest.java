@@ -125,4 +125,43 @@ public class GitFetcherIntegrationTest {
             assertThat(is).isNull();
         }
     }
+
+    @Test
+    public void shouldThrowWhenUsingForbiddenSymlink() {
+        GitFetcherConfiguration gitFetcherConfiguration = new GitFetcherConfiguration();
+        gitFetcherConfiguration.setRepository("https://github.com/gravitee-io/gravitee-fetcher-git");
+        gitFetcherConfiguration.setBranchOrTag("fix/#244-ignore-system-symlink");
+        // Symlink is pointing to /etc/host
+        gitFetcherConfiguration.setPath("src/test/resources/symlink.txt");
+
+        GitFetcher gitFetcher = new GitFetcher(gitFetcherConfiguration);
+        InputStream is = null;
+        try {
+            is = gitFetcher.fetch().getContent();
+            fail("should not happen");
+        } catch (FetcherException fetcherException) {
+            assertThat(fetcherException.getMessage())
+                .isEqualTo("Accessing a file outside the Git repository using symbolic links is not allowed");
+            assertThat(is).isNull();
+        }
+    }
+
+    @Test
+    public void shouldThrowWhenUsingInvalidCronExpression() {
+        GitFetcherConfiguration gitFetcherConfiguration = new GitFetcherConfiguration();
+        gitFetcherConfiguration.setRepository("https://github.com/gravitee-io/gravitee-fetcher-git");
+        gitFetcherConfiguration.setBranchOrTag("fix/#244-ignore-system-symlink");
+        gitFetcherConfiguration.setAutoFetch(true);
+        gitFetcherConfiguration.setFetchCron("invalid-cron");
+
+        GitFetcher gitFetcher = new GitFetcher(gitFetcherConfiguration);
+        InputStream is = null;
+        try {
+            is = gitFetcher.fetch().getContent();
+            fail("should not happen");
+        } catch (FetcherException fetcherException) {
+            assertThat(fetcherException.getMessage()).isEqualTo("Cron expression is invalid");
+            assertThat(is).isNull();
+        }
+    }
 }
