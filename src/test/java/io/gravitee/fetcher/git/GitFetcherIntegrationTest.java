@@ -130,7 +130,7 @@ public class GitFetcherIntegrationTest {
     public void shouldThrowWhenUsingForbiddenSymlink() {
         GitFetcherConfiguration gitFetcherConfiguration = new GitFetcherConfiguration();
         gitFetcherConfiguration.setRepository("https://github.com/gravitee-io/gravitee-fetcher-git");
-        gitFetcherConfiguration.setBranchOrTag("fix/#244-ignore-system-symlink");
+        gitFetcherConfiguration.setBranchOrTag("master");
         // Symlink is pointing to /etc/host
         gitFetcherConfiguration.setPath("src/test/resources/symlink.txt");
 
