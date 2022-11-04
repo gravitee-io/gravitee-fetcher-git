@@ -150,7 +150,7 @@ public class GitFetcherIntegrationTest {
     public void shouldThrowWhenUsingForbiddenFolderSymlinkInPath() {
         GitFetcherConfiguration gitFetcherConfiguration = new GitFetcherConfiguration();
         gitFetcherConfiguration.setRepository("https://github.com/gravitee-io/gravitee-fetcher-git");
-        gitFetcherConfiguration.setBranchOrTag("APIM-244-fix-folder-symlink");
+        gitFetcherConfiguration.setBranchOrTag("master");
         // `root-symlink` is a symlink pointing to /etc
         gitFetcherConfiguration.setPath("/root-symlink/ssh_config");
 
