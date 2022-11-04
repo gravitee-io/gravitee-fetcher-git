@@ -1,3 +1,10 @@
+## [1.8.1](https://github.com/gravitee-io/gravitee-fetcher-git/compare/1.8.0...1.8.1) (2022-11-04)
+
+
+### Bug Fixes
+
+* filter folder symlink from path ([747728b](https://github.com/gravitee-io/gravitee-fetcher-git/commit/747728bd29a2039c0745634c3b51aec4bf939b90))
+
 # [1.8.0](https://github.com/gravitee-io/gravitee-fetcher-git/compare/1.7.0...1.8.0) (2022-11-04)
 
 
