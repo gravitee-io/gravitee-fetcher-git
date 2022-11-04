@@ -22,6 +22,7 @@ import io.gravitee.fetcher.api.Resource;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.stream.Stream;
 import org.eclipse.jgit.api.Git;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,8 +66,8 @@ public class GitFetcher implements Fetcher {
             throw new FetcherException("Unable to create temporary directory to fetch git repository", e);
         }
 
-        File fileToFetch;
         final Resource resource = new Resource();
+        Path repositoryPath;
         try (
             Git result = Git
                 .cloneRepository()
@@ -77,15 +78,25 @@ public class GitFetcher implements Fetcher {
                 .call()
         ) {
             LOGGER.debug("Having repository: {}", result.getRepository().getDirectory());
-            fileToFetch =
-                new File(result.getRepository().getWorkTree().getAbsolutePath() + File.separatorChar + gitFetcherConfiguration.getPath());
-            resource.setContent(new FileInputStream(fileToFetch));
+            repositoryPath = result.getRepository().getWorkTree().toPath();
         } catch (Exception e) {
             throw new FetcherException("Unable to fetch git content (" + e.getMessage() + ")", e);
         }
 
-        if (Files.isSymbolicLink(fileToFetch.toPath())) {
-            checkSymbolicLinkTargetIsInsideDirectory(fileToFetch, tmpDirectory);
+        try (Stream<Path> stream = Files.walk(repositoryPath)) {
+            File fileToFetch = stream
+                .filter(path -> path.endsWith(gitFetcherConfiguration.getPath()))
+                .findAny()
+                .map(Path::toFile)
+                .orElseThrow(() -> new FetcherException("Unable to find file to fetch", null));
+
+            if (Files.isSymbolicLink(fileToFetch.toPath())) {
+                checkSymbolicLinkTargetIsInsideDirectory(fileToFetch, tmpDirectory);
+            }
+
+            resource.setContent(new FileInputStream(fileToFetch));
+        } catch (IOException e) {
+            throw new FetcherException("Unable to walk through the repository files", e);
         }
 
         return resource;
