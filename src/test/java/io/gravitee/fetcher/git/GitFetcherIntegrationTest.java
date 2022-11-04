@@ -85,7 +85,7 @@ public class GitFetcherIntegrationTest {
             is = gitFetcher.fetch().getContent();
             fail("should not happen");
         } catch (FetcherException fetcherException) {
-            assertThat(fetcherException.getMessage()).contains("Unable to fetch git content");
+            assertThat(fetcherException.getMessage()).isEqualTo("Unable to find file to fetch");
             assertThat(is).isNull();
         }
     }
@@ -127,7 +127,7 @@ public class GitFetcherIntegrationTest {
     }
 
     @Test
-    public void shouldThrowWhenUsingForbiddenSymlink() {
+    public void shouldThrowWhenUsingForbiddenFileSymlink() {
         GitFetcherConfiguration gitFetcherConfiguration = new GitFetcherConfiguration();
         gitFetcherConfiguration.setRepository("https://github.com/gravitee-io/gravitee-fetcher-git");
         gitFetcherConfiguration.setBranchOrTag("master");
@@ -147,10 +147,29 @@ public class GitFetcherIntegrationTest {
     }
 
     @Test
+    public void shouldThrowWhenUsingForbiddenFolderSymlinkInPath() {
+        GitFetcherConfiguration gitFetcherConfiguration = new GitFetcherConfiguration();
+        gitFetcherConfiguration.setRepository("https://github.com/gravitee-io/gravitee-fetcher-git");
+        gitFetcherConfiguration.setBranchOrTag("APIM-244-fix-folder-symlink");
+        // `root-symlink` is a symlink pointing to /etc
+        gitFetcherConfiguration.setPath("/root-symlink/ssh_config");
+
+        GitFetcher gitFetcher = new GitFetcher(gitFetcherConfiguration);
+        InputStream is = null;
+        try {
+            is = gitFetcher.fetch().getContent();
+            fail("should not happen");
+        } catch (FetcherException fetcherException) {
+            assertThat(fetcherException.getMessage()).isEqualTo("Unable to find file to fetch");
+            assertThat(is).isNull();
+        }
+    }
+
+    @Test
     public void shouldThrowWhenUsingInvalidCronExpression() {
         GitFetcherConfiguration gitFetcherConfiguration = new GitFetcherConfiguration();
         gitFetcherConfiguration.setRepository("https://github.com/gravitee-io/gravitee-fetcher-git");
-        gitFetcherConfiguration.setBranchOrTag("fix/#244-ignore-system-symlink");
+        gitFetcherConfiguration.setBranchOrTag("master");
         gitFetcherConfiguration.setAutoFetch(true);
         gitFetcherConfiguration.setFetchCron("invalid-cron");
 
