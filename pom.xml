@@ -38,8 +38,8 @@
         <gravitee-fetcher-api.version>1.4.0</gravitee-fetcher-api.version>
         <org.eclipse.jgit.version>6.3.0.202209071007-r</org.eclipse.jgit.version>
 
-        <maven-exec-plugin.version>3.1.0</maven-exec-plugin.version>
-        <maven-assembly-plugin.version>3.4.1</maven-assembly-plugin.version>
+        <maven-exec-plugin.version>3.1.1</maven-exec-plugin.version>
+        <maven-assembly-plugin.version>3.6.0</maven-assembly-plugin.version>
 
         <!-- Property used by the publication job in CI-->
         <publish-folder-path>graviteeio-apim/plugins/fetchers</publish-folder-path>
