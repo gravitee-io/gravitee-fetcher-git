@@ -1,3 +1,10 @@
+## [1.8.2](https://github.com/gravitee-io/gravitee-fetcher-git/compare/1.8.1...1.8.2) (2024-02-15)
+
+
+### Bug Fixes
+
+* update jgit to 6.8.0 ([9992bda](https://github.com/gravitee-io/gravitee-fetcher-git/commit/9992bdadd671e7b2bad4e836896d1e9871aca08a))
+
 ## [1.8.1](https://github.com/gravitee-io/gravitee-fetcher-git/compare/1.8.0...1.8.1) (2022-11-04)
 
 
