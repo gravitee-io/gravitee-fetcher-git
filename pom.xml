@@ -36,7 +36,7 @@
     <properties>
         <gravitee-bom.version>3.0.22</gravitee-bom.version>
         <gravitee-fetcher-api.version>1.4.0</gravitee-fetcher-api.version>
-        <org.eclipse.jgit.version>6.3.0.202209071007-r</org.eclipse.jgit.version>
+        <org.eclipse.jgit.version>6.8.0.202311291450-r</org.eclipse.jgit.version>
 
         <maven-exec-plugin.version>3.1.1</maven-exec-plugin.version>
         <maven-assembly-plugin.version>3.6.0</maven-assembly-plugin.version>
