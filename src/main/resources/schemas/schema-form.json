@@ -1,44 +1,40 @@
 {
-  "type": "object",
-  "title": "git",
-  "properties": {
-    "repository": {
-      "title": "Repository",
-      "description": "Web URL to the git repository",
-      "type": "string"
-    },
-    "branchOrTag": {
-      "title": "Branch or Tag",
-      "description": "Branch or tag to clone",
-      "type": "string",
-      "default": "master"
-    },
-    "path": {
-      "title": "Path",
-      "description": "Path to the file to fetch",
-      "type": "string"
-    },
-    "autoFetch": {
-      "title": "Auto Fetch",
-      "description": "Trigger periodic update",
-      "type": "boolean",
-      "default": false
-    },
-    "fetchCron": {
-      "title": "Update frequency",
-      "description": "Define update frequency using Crontab pattern.<BR><B>Note:</B> Platform administrator may have configure a max frequency that you cannot exceed",
-      "type": "string"
-    }
-  },
-  "required": [
-    "repository",
-    "branchOrTag",
-    "path"
-  ],
-  "if": {
+    "type": "object",
+    "title": "git",
     "properties": {
-      "autoFetch": { "const": true }
-    }
-  },
-  "then": { "required": ["fetchCron"] }
+        "repository": {
+            "title": "Repository",
+            "description": "Web URL to the git repository",
+            "type": "string"
+        },
+        "branchOrTag": {
+            "title": "Branch or Tag",
+            "description": "Branch or tag to clone",
+            "type": "string",
+            "default": "master"
+        },
+        "path": {
+            "title": "Path",
+            "description": "Path to the file to fetch",
+            "type": "string"
+        },
+        "autoFetch": {
+            "title": "Auto Fetch",
+            "description": "Trigger periodic update",
+            "type": "boolean",
+            "default": false
+        },
+        "fetchCron": {
+            "title": "Update frequency",
+            "description": "Define update frequency using Crontab pattern.<BR><B>Note:</B> Platform administrator may have configure a max frequency that you cannot exceed",
+            "type": "string"
+        }
+    },
+    "required": ["repository", "branchOrTag", "path"],
+    "if": {
+        "properties": {
+            "autoFetch": { "const": true }
+        }
+    },
+    "then": { "required": ["fetchCron"] }
 }
