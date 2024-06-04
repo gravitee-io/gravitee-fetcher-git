@@ -22,13 +22,13 @@ import io.gravitee.fetcher.api.FetcherException;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Nicolas GERAUD (nicolas <AT> graviteesource.com)
  * @author GraviteeSource Team
  */
-public class GitFetcherIntegrationTest {
+class GitFetcherIntegrationTest {
 
     @Test
     public void shouldGetExistingFileWithBranch() throws Exception {
