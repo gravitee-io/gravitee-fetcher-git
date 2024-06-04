@@ -150,35 +150,48 @@
                 <groupId>com.hubspot.maven.plugins</groupId>
                 <artifactId>prettier-maven-plugin</artifactId>
             </plugin>
-            <plugin>
-                <!-- ⚠️ This plugin in used to remove a Git section forcing SSH connection instead of HTTPS  -->
-                <!-- on CircleCI, for extra info see https://discuss.circleci.com/t/github-forced-through-ssh-protocol/5332 -->
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>${maven-exec-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <phase>generate-test-resources</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <skip>${env.CIRCLECI == null}</skip>
-                    <executable>git</executable>
-                    <arguments>
-                        <argument>config</argument>
-                        <argument>--global</argument>
-                        <argument>--remove-section</argument>
-                        <argument>url.ssh://git@github.com</argument>
-                    </arguments>
-                    <successCodes>
-                        <successCode>0</successCode>
-                        <successCode>1</successCode>
-                    </successCodes>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>CircleCI</id>
+            <activation>
+                <property>
+                    <name>env.CI</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <!-- ⚠️ This plugin in used to remove a Git section forcing SSH connection instead of HTTPS  -->
+                        <!-- on CircleCI, for extra info see https://discuss.circleci.com/t/github-forced-through-ssh-protocol/5332 -->
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>${maven-exec-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <phase>generate-test-resources</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <executable>git</executable>
+                            <arguments>
+                                <argument>config</argument>
+                                <argument>--global</argument>
+                                <argument>--remove-section</argument>
+                                <argument>url.ssh://git@github.com</argument>
+                            </arguments>
+                            <successCodes>
+                                <successCode>0</successCode>
+                                <successCode>1</successCode>
+                            </successCodes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
