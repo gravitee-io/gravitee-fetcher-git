@@ -1,3 +1,15 @@
+# [2.0.0](https://github.com/gravitee-io/gravitee-fetcher-git/compare/1.8.2...2.0.0) (2024-06-05)
+
+
+### chore
+
+* bump dependencies ([cda50c4](https://github.com/gravitee-io/gravitee-fetcher-git/commit/cda50c4427be5bc48198c0e88a47ce56ff819d48))
+
+
+### BREAKING CHANGES
+
+* require JDK 17
+
 ## [1.8.2](https://github.com/gravitee-io/gravitee-fetcher-git/compare/1.8.1...1.8.2) (2024-02-15)
 
 
