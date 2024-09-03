@@ -1,3 +1,10 @@
+# [2.1.0](https://github.com/gravitee-io/gravitee-fetcher-git/compare/2.0.0...2.1.0) (2024-09-03)
+
+
+### Features
+
+* improve fetchCron field ([41883d0](https://github.com/gravitee-io/gravitee-fetcher-git/commit/41883d0c6d009d928ae1da77bdf317a288c1f087))
+
 # [2.0.0](https://github.com/gravitee-io/gravitee-fetcher-git/compare/1.8.2...2.0.0) (2024-06-05)
 
 
