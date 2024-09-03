@@ -19,15 +19,23 @@
             "type": "string"
         },
         "autoFetch": {
-            "title": "Auto Fetch",
-            "description": "Trigger periodic update",
+            "title": "Enable Auto Fetch",
+            "description": "Enable a periodic update of this documentation page",
             "type": "boolean",
             "default": false
         },
         "fetchCron": {
             "title": "Update frequency",
-            "description": "Define update frequency using Crontab pattern.<BR><B>Note:</B> Platform administrator may have configure a max frequency that you cannot exceed",
-            "type": "string"
+            "description": "Define update frequency using Crontab pattern. Note: Platform administrator may have configured a max frequency that you cannot exceed.",
+            "type": "string",
+            "format": "gio-cron",
+            "gioConfig": {
+                "displayIf": {
+                    "$eq": {
+                        "value.autoFetch": true
+                    }
+                }
+            }
         }
     },
     "required": ["repository", "branchOrTag", "path"],
