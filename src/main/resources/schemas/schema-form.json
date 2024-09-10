@@ -1,6 +1,7 @@
 {
+    "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
-    "title": "git",
+    "title": "GIT",
     "properties": {
         "repository": {
             "title": "Repository",
@@ -9,7 +10,7 @@
         },
         "branchOrTag": {
             "title": "Branch or Tag",
-            "description": "Branch or tag to clone",
+            "description": "Branch name or tag (e.g. master). Default to master.",
             "type": "string",
             "default": "master"
         },
@@ -26,7 +27,7 @@
         },
         "fetchCron": {
             "title": "Update frequency",
-            "description": "Define update frequency using Crontab pattern. Note: Platform administrator may have configured a max frequency that you cannot exceed.",
+            "description": "Define update frequency using Crontab pattern. Leaving it empty will not trigger any update. Note: Platform administrator may have configured a max frequency that you cannot exceed.",
             "type": "string",
             "format": "gio-cron",
             "gioConfig": {
@@ -38,11 +39,5 @@
             }
         }
     },
-    "required": ["repository", "branchOrTag", "path"],
-    "if": {
-        "properties": {
-            "autoFetch": { "const": true }
-        }
-    },
-    "then": { "required": ["fetchCron"] }
+    "required": ["repository", "branchOrTag", "path"]
 }
