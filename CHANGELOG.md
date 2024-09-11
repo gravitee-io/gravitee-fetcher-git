@@ -1,3 +1,10 @@
+## [2.1.1](https://github.com/gravitee-io/gravitee-fetcher-git/compare/2.1.0...2.1.1) (2024-09-11)
+
+
+### Bug Fixes
+
+* improve schema form ([ef1d78a](https://github.com/gravitee-io/gravitee-fetcher-git/commit/ef1d78a9dd9db49ee5bf65962b7351255c3128cf))
+
 # [2.1.0](https://github.com/gravitee-io/gravitee-fetcher-git/compare/2.0.0...2.1.0) (2024-09-03)
 
 
