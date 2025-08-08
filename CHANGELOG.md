@@ -1,3 +1,10 @@
+## [2.1.2](https://github.com/gravitee-io/gravitee-fetcher-git/compare/2.1.1...2.1.2) (2025-08-08)
+
+
+### Bug Fixes
+
+* **deps:** update org.eclipse.jgit:org.eclipse.jgit to v6.10.1.202505221210-r ([013495d](https://github.com/gravitee-io/gravitee-fetcher-git/commit/013495dbd336634c435f82a2df52380b8f446e65))
+
 ## [2.1.1](https://github.com/gravitee-io/gravitee-fetcher-git/compare/2.1.0...2.1.1) (2024-09-11)
 
 
