@@ -73,8 +73,7 @@ public class GitFetcher implements Fetcher {
             final Resource resource = new Resource();
             Path repositoryPath;
             try (
-                Git result = Git
-                    .cloneRepository()
+                Git result = Git.cloneRepository()
                     .setURI(this.gitFetcherConfiguration.getRepository())
                     .setDirectory(tmpDirectory)
                     .setBranch(this.gitFetcherConfiguration.getBranchOrTag())

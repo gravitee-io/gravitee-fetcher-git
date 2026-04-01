@@ -141,8 +141,9 @@ class GitFetcherIntegrationTest {
             is = gitFetcher.fetch().getContent();
             fail("should not happen");
         } catch (FetcherException fetcherException) {
-            assertThat(fetcherException.getMessage())
-                .isEqualTo("Accessing a file outside the Git repository using symbolic links is not allowed");
+            assertThat(fetcherException.getMessage()).isEqualTo(
+                "Accessing a file outside the Git repository using symbolic links is not allowed"
+            );
             assertThat(is).isNull();
         }
     }
