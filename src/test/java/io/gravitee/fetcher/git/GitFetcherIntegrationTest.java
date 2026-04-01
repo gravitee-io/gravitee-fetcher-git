@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.fail;
 
 import io.gravitee.fetcher.api.FetcherException;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import org.junit.jupiter.api.Test;
@@ -163,6 +164,51 @@ class GitFetcherIntegrationTest {
             assertThat(fetcherException.getMessage()).isEqualTo("Unable to find file to fetch");
             assertThat(is).isNull();
         }
+    }
+
+    @Test
+    public void shouldDeleteTmpDirectoryOnStreamClose() throws Exception {
+        GitFetcherConfiguration config = new GitFetcherConfiguration();
+        config.setRepository("https://github.com/gravitee-io/gravitee-fetcher-git");
+        config.setBranchOrTag("master");
+        config.setPath("pom.xml");
+
+        File[] before = listGraviteeIoTmpDirs();
+
+        try (InputStream is = new GitFetcher(config).fetch().getContent()) {
+            assertThat(is).isNotNull();
+            // tmp dir exists while stream is open
+        }
+        // after close(), CleanupInputStream should have deleted the tmp dir
+        File[] after = listGraviteeIoTmpDirs();
+        assertThat(after).hasSameSizeAs(before);
+    }
+
+    @Test
+    public void shouldDeleteTmpDirectoryOnFetchError() {
+        GitFetcherConfiguration config = new GitFetcherConfiguration();
+        config.setRepository("https://github.com/gravitee-io/gravitee-fetcher-git");
+        config.setBranchOrTag("master");
+        config.setPath("this-file-does-not-exist.txt");
+
+        File[] before = listGraviteeIoTmpDirs();
+
+        try {
+            new GitFetcher(config).fetch();
+            fail("should throw FetcherException");
+        } catch (FetcherException e) {
+            assertThat(e.getMessage()).isEqualTo("Unable to find file to fetch");
+        }
+
+        // finally block should have cleaned up the tmp dir on error path
+        File[] after = listGraviteeIoTmpDirs();
+        assertThat(after).hasSameSizeAs(before);
+    }
+
+    private static File[] listGraviteeIoTmpDirs() {
+        File tmpDir = new File(System.getProperty("java.io.tmpdir"));
+        File[] dirs = tmpDir.listFiles(f -> f.getName().startsWith("Gravitee-io") && f.isDirectory());
+        return dirs != null ? dirs : new File[0];
     }
 
     @Test
