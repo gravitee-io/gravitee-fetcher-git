@@ -1,3 +1,17 @@
+# [3.0.0](https://github.com/gravitee-io/gravitee-fetcher-git/compare/2.1.2...3.0.0) (2026-04-02)
+
+
+### Bug Fixes
+
+* **git-fetcher:** delete tmp clone directory on stream close ([#55](https://github.com/gravitee-io/gravitee-fetcher-git/issues/55)) ([c883cf0](https://github.com/gravitee-io/gravitee-fetcher-git/commit/c883cf0204e6dc8425479fd932ded177527bf143))
+
+
+### BREAKING CHANGES
+
+* **git-fetcher:** requires Java 21
+
+* chore: apply prettier formatting
+
 ## [2.1.2](https://github.com/gravitee-io/gravitee-fetcher-git/compare/2.1.1...2.1.2) (2025-08-08)
 
 
