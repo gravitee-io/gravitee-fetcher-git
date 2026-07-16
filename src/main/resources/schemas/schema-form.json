@@ -15,8 +15,8 @@
             "default": "master"
         },
         "path": {
-            "title": "Path",
-            "description": "Path to the file to fetch",
+            "title": "Filepath",
+            "description": "The path to the file to fetch (e.g. docs/main/README.md)",
             "type": "string"
         },
         "autoFetch": {

@@ -86,7 +86,9 @@ class GitFetcherIntegrationTest {
             is = gitFetcher.fetch().getContent();
             fail("should not happen");
         } catch (FetcherException fetcherException) {
-            assertThat(fetcherException.getMessage()).isEqualTo("Unable to find file to fetch");
+            assertThat(fetcherException.getMessage()).isEqualTo(
+                "Unable to find file 'unknown' in repository 'https://github.com/gravitee-io/gravitee-fetcher-git' (ref: master)"
+            );
             assertThat(is).isNull();
         }
     }
@@ -162,7 +164,9 @@ class GitFetcherIntegrationTest {
             is = gitFetcher.fetch().getContent();
             fail("should not happen");
         } catch (FetcherException fetcherException) {
-            assertThat(fetcherException.getMessage()).isEqualTo("Unable to find file to fetch");
+            assertThat(fetcherException.getMessage()).isEqualTo(
+                "Unable to find file '/root-symlink/ssh_config' in repository 'https://github.com/gravitee-io/gravitee-fetcher-git' (ref: master)"
+            );
             assertThat(is).isNull();
         }
     }
@@ -198,7 +202,9 @@ class GitFetcherIntegrationTest {
             new GitFetcher(config).fetch();
             fail("should throw FetcherException");
         } catch (FetcherException e) {
-            assertThat(e.getMessage()).isEqualTo("Unable to find file to fetch");
+            assertThat(e.getMessage()).isEqualTo(
+                "Unable to find file 'this-file-does-not-exist.txt' in repository 'https://github.com/gravitee-io/gravitee-fetcher-git' (ref: master)"
+            );
         }
 
         // finally block should have cleaned up the tmp dir on error path

@@ -19,6 +19,7 @@ import io.gravitee.fetcher.api.Fetcher;
 import io.gravitee.fetcher.api.FetcherConfiguration;
 import io.gravitee.fetcher.api.FetcherException;
 import io.gravitee.fetcher.api.Resource;
+import io.gravitee.fetcher.api.ResourceNotFoundException;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -59,6 +60,11 @@ public class GitFetcher implements Fetcher {
             }
         }
 
+        final String normalizedPath = normalizePath(gitFetcherConfiguration.getPath());
+        if (normalizedPath.isEmpty()) {
+            throw new FetcherException("Unable to fetch git content: the path to the file to fetch is missing", null);
+        }
+
         File tmpDirectory;
         try {
             tmpDirectory = File.createTempFile("Gravitee-io", "");
@@ -88,10 +94,10 @@ public class GitFetcher implements Fetcher {
 
             try (Stream<Path> stream = Files.walk(repositoryPath)) {
                 File fileToFetch = stream
-                    .filter(path -> path.endsWith(gitFetcherConfiguration.getPath()))
+                    .filter(path -> path.endsWith(normalizedPath))
                     .findAny()
                     .map(Path::toFile)
-                    .orElseThrow(() -> new FetcherException("Unable to find file to fetch", null));
+                    .orElseThrow(() -> new ResourceNotFoundException(buildNotFoundMessage(), null));
 
                 if (Files.isSymbolicLink(fileToFetch.toPath())) {
                     checkSymbolicLinkTargetIsInsideDirectory(fileToFetch, tmpDirectory);
@@ -109,6 +115,34 @@ public class GitFetcher implements Fetcher {
                 deleteQuietly(tmpDirectory);
             }
         }
+    }
+
+    /** Accepts both path forms (with or without leading slash); never persisted back to the configuration. */
+    private static String normalizePath(String path) {
+        return path == null ? "" : path.trim().replaceAll("^/+", "");
+    }
+
+    private String buildNotFoundMessage() {
+        String ref = gitFetcherConfiguration.getBranchOrTag() == null || gitFetcherConfiguration.getBranchOrTag().isEmpty()
+            ? "default branch"
+            : gitFetcherConfiguration.getBranchOrTag();
+        return (
+            "Unable to find file '" +
+            gitFetcherConfiguration.getPath() +
+            "' in repository '" +
+            sanitizeRepository(gitFetcherConfiguration.getRepository()) +
+            "' (ref: " +
+            ref +
+            ")"
+        );
+    }
+
+    /**
+     * This plugin has no dedicated credential field, so the repository URL commonly embeds them
+     * (https://user:token@host/...). Strip the userinfo part before the URL reaches an error message.
+     */
+    static String sanitizeRepository(String repository) {
+        return repository == null ? "" : repository.replaceFirst("^([a-zA-Z][a-zA-Z0-9+.\\-]*://)[^/@]*@", "$1");
     }
 
     static final class CleanupInputStream extends FilterInputStream {
