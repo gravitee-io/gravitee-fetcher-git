@@ -1,3 +1,10 @@
+## [3.0.1](https://github.com/gravitee-io/gravitee-fetcher-git/compare/3.0.0...3.0.1) (2026-07-20)
+
+
+### Bug Fixes
+
+* normalize path and raise ResourceNotFoundException ([135004a](https://github.com/gravitee-io/gravitee-fetcher-git/commit/135004ac0ccda65d8c462e7161736b9711a72b83))
+
 # [3.0.0](https://github.com/gravitee-io/gravitee-fetcher-git/compare/2.1.2...3.0.0) (2026-04-02)
 
 
