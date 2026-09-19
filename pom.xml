@@ -38,7 +38,6 @@
         <gravitee-fetcher-api.version>2.1.0</gravitee-fetcher-api.version>
         <org.eclipse.jgit.version>6.10.1.202505221210-r</org.eclipse.jgit.version>
 
-        <maven-assembly-plugin.version>3.8.0</maven-assembly-plugin.version>
         <maven-exec-plugin.version>3.6.4</maven-exec-plugin.version>
         <maven-resources-plugin.version>3.5.0</maven-resources-plugin.version>
         <!-- Property used by the publication job in CI-->
@@ -129,7 +128,6 @@
             </plugin>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>${maven-assembly-plugin.version}</version>
                 <configuration>
                     <appendAssemblyId>false</appendAssemblyId>
                     <descriptors>
@@ -145,10 +143,6 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>com.hubspot.maven.plugins</groupId>
-                <artifactId>prettier-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
