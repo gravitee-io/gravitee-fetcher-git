@@ -19,6 +19,21 @@
             "description": "The path to the file to fetch (e.g. docs/main/README.md)",
             "type": "string"
         },
+        "username": {
+            "title": "Username",
+            "description": "Username for HTTP basic authentication. Leave empty for public repositories. When authenticating with an access token, providers usually accept any value here, such as your account login or 'oauth2'.",
+            "type": "string"
+        },
+        "password": {
+            "title": "Password or access token",
+            "description": "Password (or personal/HTTP access token) for HTTP basic authentication. Leave empty for public repositories.",
+            "type": "string",
+            "format": "password",
+            "writeOnly": true,
+            "x-schema-form": {
+                "type": "password"
+            }
+        },
         "autoFetch": {
             "title": "Enable Auto Fetch",
             "description": "Enable a periodic update of this documentation page",

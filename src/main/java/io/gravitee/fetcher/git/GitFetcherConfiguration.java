@@ -16,6 +16,7 @@
 package io.gravitee.fetcher.git;
 
 import io.gravitee.fetcher.api.FetcherConfiguration;
+import io.gravitee.fetcher.api.Sensitive;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -32,6 +33,12 @@ public class GitFetcherConfiguration implements FetcherConfiguration {
     private String branchOrTag;
 
     private String path;
+
+    private String username;
+
+    /** Password or access token used to authenticate against a private repository. */
+    @Sensitive
+    private String password;
 
     private String fetchCron;
 

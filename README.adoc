@@ -14,7 +14,18 @@ endif::[]
 This plugin allow Gravitee.io to fetch content from a Git repository.
 It's primarily used to fetch documentation.
 
-**Authentication is currently not supported**.
+=== Authentication
+
+A private repository is reached over HTTPS with the `Username` and `Password or access token` fields, sent as HTTP basic
+authentication. Both are optional: leave them empty for a public repository.
+
+An access token goes in the password field. The username that goes with it is usually ignored by the provider — your
+account login or `oauth2` does the job — but a few of them do check it, so filling both fields is the safe option.
+
+The password is stored and masked by APIM like the credentials of the other fetchers, and it is never written to the
+logs nor to an error message.
+
+**SSH authentication (private key) is not supported yet.**
 
 == Compatibility matrix
 
