@@ -37,6 +37,8 @@
         <gravitee-bom.version>6.0.64</gravitee-bom.version>
         <gravitee-fetcher-api.version>2.1.0</gravitee-fetcher-api.version>
         <org.eclipse.jgit.version>6.10.1.202505221210-r</org.eclipse.jgit.version>
+        <jetty.version>10.0.21</jetty.version>
+        <junit4.version>4.13.2</junit4.version>
 
         <maven-exec-plugin.version>3.6.4</maven-exec-plugin.version>
         <maven-resources-plugin.version>3.5.0</maven-resources-plugin.version>
@@ -46,6 +48,14 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- Pin Jetty to the javax.servlet line JGit's test server is built against, over the Jakarta one the Gravitee bom brings -->
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-bom</artifactId>
+                <version>${jetty.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
             <!-- Import bom to properly inherit all dependencies -->
             <dependency>
                 <groupId>io.gravitee</groupId>
@@ -97,9 +107,29 @@
             <artifactId>junit-jupiter-engine</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Serves a local repository over HTTP, with and without Basic authentication -->
+        <dependency>
+            <groupId>org.eclipse.jgit</groupId>
+            <artifactId>org.eclipse.jgit.junit.http</artifactId>
+            <version>${org.eclipse.jgit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- JGit's test server is written against JUnit 4; the tests themselves run on JUnit 5 -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit4.version}</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Reads the configuration schema served to the Console -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
             <scope>test</scope>
         </dependency>
 

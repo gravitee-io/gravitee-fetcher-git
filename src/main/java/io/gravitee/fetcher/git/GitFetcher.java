@@ -24,8 +24,13 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.transport.CredentialsProvider;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.support.CronExpression;
@@ -37,6 +42,14 @@ import org.springframework.scheduling.support.CronExpression;
 public class GitFetcher implements Fetcher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GitFetcher.class);
+    private static final Pattern URL_CREDENTIALS = Pattern.compile("^([a-zA-Z][a-zA-Z0-9+.\\-]*://)[^/@]*@");
+    private static final List<String> AUTHENTICATION_FAILURE_HINTS = List.of(
+        "not authorized",
+        "authentication is required",
+        "authentication failed",
+        "401 unauthorized"
+    );
+
     private final GitFetcherConfiguration gitFetcherConfiguration;
 
     public GitFetcher(GitFetcherConfiguration gitFetcherConfiguration) {
@@ -83,13 +96,14 @@ public class GitFetcher implements Fetcher {
                     .setURI(this.gitFetcherConfiguration.getRepository())
                     .setDirectory(tmpDirectory)
                     .setBranch(this.gitFetcherConfiguration.getBranchOrTag())
+                    .setCredentialsProvider(credentialsProvider(this.gitFetcherConfiguration))
                     .setDepth(1)
                     .call()
             ) {
                 LOGGER.debug("Having repository: {}", result.getRepository().getDirectory());
                 repositoryPath = result.getRepository().getWorkTree().toPath();
             } catch (Exception e) {
-                throw new FetcherException("Unable to fetch git content (" + e.getMessage() + ")", e);
+                throw toFetcherException(e);
             }
 
             try (Stream<Path> stream = Files.walk(repositoryPath)) {
@@ -117,6 +131,75 @@ public class GitFetcher implements Fetcher {
         }
     }
 
+    /**
+     * Builds the JGit credentials from the configured username and password, or {@code null} when the repository is
+     * public and no credentials are configured.
+     *
+     * <p>An access token is sent as the password, and providers usually ignore the username that goes with it. Half a
+     * configuration is still sent rather than dropped, so that a server which accepts it works and the others answer
+     * with an authentication failure the publisher can act on.
+     */
+    static CredentialsProvider credentialsProvider(GitFetcherConfiguration configuration) {
+        String username = trimToNull(configuration.getUsername());
+        String password = trimToNull(configuration.getPassword());
+        if (username == null && password == null) {
+            return null;
+        }
+        return new UsernamePasswordCredentialsProvider(username == null ? "" : username, password == null ? "" : password);
+    }
+
+    private FetcherException toFetcherException(Exception e) {
+        if (!isAuthenticationFailure(e)) {
+            return new FetcherException("Unable to fetch git content (" + e.getMessage() + ")", e);
+        }
+
+        String repository = sanitizeRepository(gitFetcherConfiguration.getRepository());
+        if (hasCredentials()) {
+            return new FetcherException(
+                "Unable to fetch git content: authentication failed for repository '" +
+                    repository +
+                    "', check the configured username and password or token",
+                e
+            );
+        }
+        return new FetcherException(
+            "Unable to fetch git content: repository '" + repository + "' requires authentication but no credentials are configured",
+            e
+        );
+    }
+
+    /** Credentials carried by the repository URL (https://user:token@host/...) are credentials too. */
+    private boolean hasCredentials() {
+        String repository = gitFetcherConfiguration.getRepository();
+        return credentialsProvider(gitFetcherConfiguration) != null || (repository != null && URL_CREDENTIALS.matcher(repository).find());
+    }
+
+    /**
+     * JGit reports a rejected or a missing authentication as a transport failure whose wording depends on the
+     * transport, so the whole cause chain is scanned for the phrases it uses.
+     */
+    private static boolean isAuthenticationFailure(Throwable throwable) {
+        for (Throwable cause = throwable; cause != null && cause != cause.getCause(); cause = cause.getCause()) {
+            String message = cause.getMessage();
+            if (message == null) {
+                continue;
+            }
+            String lowerCaseMessage = message.toLowerCase(Locale.ROOT);
+            if (AUTHENTICATION_FAILURE_HINTS.stream().anyMatch(lowerCaseMessage::contains)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static String trimToNull(String value) {
+        if (value == null) {
+            return null;
+        }
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
+    }
+
     /** Accepts both path forms (with or without leading slash); never persisted back to the configuration. */
     private static String normalizePath(String path) {
         return path == null ? "" : path.trim().replaceAll("^/+", "");
@@ -138,11 +221,12 @@ public class GitFetcher implements Fetcher {
     }
 
     /**
-     * This plugin has no dedicated credential field, so the repository URL commonly embeds them
-     * (https://user:token@host/...). Strip the userinfo part before the URL reaches an error message.
+     * Credentials can also be embedded in the repository URL (https://user:token@host/...), as this was the only way to
+     * reach a private repository before the plugin had credential fields. Strip the userinfo part before the URL
+     * reaches an error message.
      */
     static String sanitizeRepository(String repository) {
-        return repository == null ? "" : repository.replaceFirst("^([a-zA-Z][a-zA-Z0-9+.\\-]*://)[^/@]*@", "$1");
+        return repository == null ? "" : URL_CREDENTIALS.matcher(repository).replaceFirst("$1");
     }
 
     static final class CleanupInputStream extends FilterInputStream {
