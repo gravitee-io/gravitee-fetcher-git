@@ -211,6 +211,8 @@
                             <successCodes>
                                 <successCode>0</successCode>
                                 <successCode>1</successCode>
+                                <!-- git exits with 128 once the section is gone, which happens as soon as a job runs the lifecycle twice -->
+                                <successCode>128</successCode>
                             </successCodes>
                         </configuration>
                     </plugin>
