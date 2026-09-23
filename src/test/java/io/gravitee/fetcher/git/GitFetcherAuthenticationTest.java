@@ -130,6 +130,19 @@ class GitFetcherAuthenticationTest {
     }
 
     @Test
+    void should_keep_the_generic_error_when_the_failure_is_not_an_authentication_one() {
+        GitFetcherConfiguration configuration = configuration(publicRepositoryUri, null, null);
+        configuration.setBranchOrTag("unknown-branch");
+        GitFetcher fetcher = new GitFetcher(configuration);
+
+        // A missing branch must not be reported as an authentication problem
+        assertThatThrownBy(fetcher::fetch)
+            .isInstanceOf(FetcherException.class)
+            .hasMessageStartingWith("Unable to fetch git content (")
+            .hasMessageNotContaining("authentication");
+    }
+
+    @Test
     void should_not_leak_the_configured_password_in_the_error_message() {
         GitFetcher fetcher = new GitFetcher(configuration(privateRepositoryUri, AppServer.username, "s3cr3t-token"));
 
