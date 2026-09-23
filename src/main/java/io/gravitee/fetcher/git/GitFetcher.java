@@ -42,7 +42,7 @@ import org.springframework.scheduling.support.CronExpression;
 public class GitFetcher implements Fetcher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GitFetcher.class);
-    private static final Pattern URL_CREDENTIALS = Pattern.compile("^([a-zA-Z][a-zA-Z0-9+.\\-]*://)[^/@]*@");
+    private static final Pattern URL_CREDENTIALS = Pattern.compile("^([a-zA-Z][a-zA-Z0-9+.\\-]*://)[^/]*@");
     private static final List<String> AUTHENTICATION_FAILURE_HINTS = List.of(
         "not authorized",
         "authentication is required",
@@ -188,7 +188,7 @@ public class GitFetcher implements Fetcher {
     /** Credentials carried by the repository URL (https://user:token@host/...) are credentials too. */
     private static boolean hasCredentials(GitFetcherConfiguration configuration) {
         String repository = configuration.getRepository();
-        return credentialsProvider(configuration) != null || (repository != null && URL_CREDENTIALS.matcher(repository).find());
+        return credentialsProvider(configuration) != null || (repository != null && URL_CREDENTIALS.matcher(repository.trim()).find());
     }
 
     /**
@@ -245,10 +245,11 @@ public class GitFetcher implements Fetcher {
     /**
      * Credentials can also be embedded in the repository URL (https://user:token@host/...), as this was the only way to
      * reach a private repository before the plugin had credential fields. Strip the userinfo part before the URL
-     * reaches an error message.
+     * reaches an error message or a log. Like JGit, the userinfo runs up to the last {@code @} before the path, so a
+     * password may itself contain {@code @}.
      */
     static String sanitizeRepository(String repository) {
-        return repository == null ? "" : URL_CREDENTIALS.matcher(repository).replaceFirst("$1");
+        return repository == null ? "" : URL_CREDENTIALS.matcher(repository.trim()).replaceFirst("$1");
     }
 
     static final class CleanupInputStream extends FilterInputStream {

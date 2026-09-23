@@ -78,9 +78,24 @@ class GitFetcherPathNormalizationTest {
     }
 
     @Test
+    void should_strip_credentials_whose_password_contains_an_at_sign() {
+        assertThat(GitFetcher.sanitizeRepository("https://user:p@ss@example.org/org/repo.git")).isEqualTo(
+            "https://example.org/org/repo.git"
+        );
+    }
+
+    @Test
+    void should_strip_credentials_from_a_repository_url_with_surrounding_whitespace() {
+        assertThat(GitFetcher.sanitizeRepository(" http://user:s3cr3t-token@example.org/org/repo.git ")).isEqualTo(
+            "http://example.org/org/repo.git"
+        );
+    }
+
+    @Test
     void should_leave_repository_url_untouched_when_it_carries_no_credentials() {
         assertThat(GitFetcher.sanitizeRepository("https://example.org/org/repo.git")).isEqualTo("https://example.org/org/repo.git");
         assertThat(GitFetcher.sanitizeRepository("git@example.org:org/repo.git")).isEqualTo("git@example.org:org/repo.git");
+        assertThat(GitFetcher.sanitizeRepository("https://example.org/org/repo@v1.git")).isEqualTo("https://example.org/org/repo@v1.git");
     }
 
     @Test
