@@ -96,6 +96,14 @@ class GitFetcherCredentialsTest {
     }
 
     @Test
+    void should_send_the_password_as_typed_without_trimming_it() {
+        CredentialsProvider provider = GitFetcher.credentialsProvider(configuration(" publisher ", " pass phrase "));
+
+        assertThat(usernameOf(provider)).isEqualTo("publisher");
+        assertThat(passwordOf(provider)).isEqualTo(" pass phrase ");
+    }
+
+    @Test
     void should_expose_the_password_as_sensitive_so_that_apim_masks_it() throws Exception {
         assertThat(GitFetcherConfiguration.class.getDeclaredField("password").isAnnotationPresent(Sensitive.class)).isTrue();
         assertThat(GitFetcherConfiguration.class.getDeclaredField("username").isAnnotationPresent(Sensitive.class)).isFalse();
