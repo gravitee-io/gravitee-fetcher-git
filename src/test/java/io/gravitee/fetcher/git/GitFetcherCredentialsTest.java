@@ -18,6 +18,7 @@ package io.gravitee.fetcher.git;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.gravitee.fetcher.api.Sensitive;
+import java.util.List;
 import org.eclipse.jgit.transport.CredentialItem;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.URIish;
@@ -79,12 +80,39 @@ class GitFetcherCredentialsTest {
     }
 
     @Test
+    void should_flag_credentials_sent_over_a_plain_http_repository_whatever_the_case() {
+        GitFetcherConfiguration configuration = configuration("publisher", "s3cr3t-token");
+        configuration.setRepository(" HTTP://example.org/org/documentation.git");
+
+        assertThat(GitFetcher.sendsCredentialsInClearText(configuration)).isTrue();
+    }
+
+    @Test
     void should_not_flag_credentials_sent_over_an_encrypted_transport() {
         assertThat(GitFetcher.sendsCredentialsInClearText(configuration("publisher", "s3cr3t-token"))).isFalse();
 
         GitFetcherConfiguration overSsh = configuration("publisher", "s3cr3t-token");
         overSsh.setRepository("git@example.org:org/documentation.git");
         assertThat(GitFetcher.sendsCredentialsInClearText(overSsh)).isFalse();
+    }
+
+    @Test
+    void should_not_flag_a_repository_that_does_not_send_credentials_in_clear_text() {
+        assertThat(
+            List.of(
+                "ssh://git@example.org/org/documentation.git",
+                "git+ssh://git@example.org/org/documentation.git",
+                "deploy@example.org:org/documentation.git",
+                "example.org:org/documentation.git",
+                "git://example.org/org/documentation.git",
+                "file:///srv/git/documentation.git",
+                "/srv/git/documentation.git"
+            )
+        ).allSatisfy(repository -> {
+            GitFetcherConfiguration configuration = configuration("publisher", "s3cr3t-token");
+            configuration.setRepository(repository);
+            assertThat(GitFetcher.sendsCredentialsInClearText(configuration)).as(repository).isFalse();
+        });
     }
 
     @Test

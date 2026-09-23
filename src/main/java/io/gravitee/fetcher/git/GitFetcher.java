@@ -43,7 +43,6 @@ public class GitFetcher implements Fetcher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GitFetcher.class);
     private static final Pattern URL_CREDENTIALS = Pattern.compile("^([a-zA-Z][a-zA-Z0-9+.\\-]*://)[^/@]*@");
-    private static final List<String> SAFE_TRANSPORT_PREFIXES = List.of("https://", "ssh://", "git@", "file://");
     private static final List<String> AUTHENTICATION_FAILURE_HINTS = List.of(
         "not authorized",
         "authentication is required",
@@ -157,15 +156,14 @@ public class GitFetcher implements Fetcher {
     }
 
     /**
-     * Whether the configured credentials would leave the gateway unencrypted. HTTPS and SSH protect them; a plain
-     * {@code http://} remote does not, and a local {@code file://} one sends nothing over the wire.
+     * Whether the configured credentials would leave the gateway unencrypted. Only a plain {@code http://} remote sends
+     * them in clear text: HTTPS and SSH encrypt them, {@code git://} and local paths never send them.
      */
     static boolean sendsCredentialsInClearText(GitFetcherConfiguration configuration) {
         if (credentialsProvider(configuration) == null || configuration.getRepository() == null) {
             return false;
         }
-        String repository = configuration.getRepository().trim().toLowerCase(Locale.ROOT);
-        return SAFE_TRANSPORT_PREFIXES.stream().noneMatch(repository::startsWith);
+        return configuration.getRepository().trim().toLowerCase(Locale.ROOT).startsWith("http://");
     }
 
     private FetcherException toFetcherException(Exception e) {
