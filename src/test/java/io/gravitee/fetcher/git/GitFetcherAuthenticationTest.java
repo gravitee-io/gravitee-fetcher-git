@@ -15,15 +15,23 @@
  */
 package io.gravitee.fetcher.git;
 
+import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.InstanceOfAssertFactories.STRING;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import io.gravitee.fetcher.api.FetcherException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jgit.api.Git;
@@ -36,6 +44,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.slf4j.LoggerFactory;
 
 /**
  * Acceptance tests for PORTAL-197: the fetcher must authenticate against a private repository.
@@ -76,7 +85,7 @@ class GitFetcherAuthenticationTest {
         repository = git.getRepository();
 
         server = new AppServer(0);
-        ServletContextHandler publicContext = gitContext("/public");
+        gitContext("/public");
         ServletContextHandler privateContext = gitContext("/private");
         server.authBasic(privateContext);
         server.setUp();
@@ -172,6 +181,40 @@ class GitFetcherAuthenticationTest {
         assertThat(readAll(fetcher.fetch().getContent())).isEqualTo(PAGE_CONTENT);
     }
 
+    @Test
+    void should_warn_without_leaking_them_when_configured_credentials_are_sent_over_plain_http() throws Throwable {
+        GitFetcher fetcher = new GitFetcher(configuration(publicRepositoryUri, "someone", "s3cr3t-token"));
+
+        List<ILoggingEvent> warnings = warningsLoggedDuring(() -> readAll(fetcher.fetch().getContent()));
+
+        assertThat(warnings)
+            .singleElement()
+            .extracting(ILoggingEvent::getFormattedMessage, as(STRING))
+            .contains("'" + publicRepositoryUri + "'", "will be sent unencrypted")
+            .doesNotContain("s3cr3t-token");
+    }
+
+    @Test
+    void should_warn_without_leaking_them_when_credentials_embedded_in_the_url_are_sent_over_plain_http() throws Throwable {
+        String repositoryWithCredentials = publicRepositoryUri.replace("http://", "http://someone:s3cr3t-token@");
+        GitFetcher fetcher = new GitFetcher(configuration(repositoryWithCredentials, null, null));
+
+        List<ILoggingEvent> warnings = warningsLoggedDuring(() -> readAll(fetcher.fetch().getContent()));
+
+        assertThat(warnings)
+            .singleElement()
+            .extracting(ILoggingEvent::getFormattedMessage, as(STRING))
+            .contains("'" + publicRepositoryUri + "'", "will be sent unencrypted")
+            .doesNotContain("s3cr3t-token");
+    }
+
+    @Test
+    void should_not_warn_when_no_credentials_are_sent_over_plain_http() throws Throwable {
+        GitFetcher fetcher = new GitFetcher(configuration(publicRepositoryUri, null, null));
+
+        assertThat(warningsLoggedDuring(() -> readAll(fetcher.fetch().getContent()))).isEmpty();
+    }
+
     private static ServletContextHandler gitContext(String path) {
         GitServlet gitServlet = new GitServlet();
         RepositoryResolver<HttpServletRequest> resolver = (request, name) -> {
@@ -194,6 +237,22 @@ class GitFetcherAuthenticationTest {
         configuration.setUsername(username);
         configuration.setPassword(password);
         return configuration;
+    }
+
+    private static List<ILoggingEvent> warningsLoggedDuring(ThrowingCallable action) throws Throwable {
+        Logger logger = (Logger) LoggerFactory.getLogger(GitFetcher.class);
+        ListAppender<ILoggingEvent> appender = new ListAppender<>();
+        appender.start();
+        logger.addAppender(appender);
+        try {
+            action.call();
+        } finally {
+            logger.detachAppender(appender);
+        }
+        return appender.list
+            .stream()
+            .filter(event -> event.getLevel() == Level.WARN)
+            .toList();
     }
 
     private static String readAll(InputStream inputStream) throws Exception {
