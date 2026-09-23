@@ -81,10 +81,16 @@ class GitFetcherCredentialsTest {
         assertThat(GitFetcher.sendsCredentialsInClearText(configuration)).isTrue();
     }
 
-    @Test
-    void should_flag_credentials_embedded_in_a_plain_http_repository_url() {
+    @ParameterizedTest
+    @ValueSource(
+        strings = {
+            "http://someone:s3cr3t-token@example.org/org/documentation.git",
+            " http://someone:s3cr3t-token@example.org/org/documentation.git",
+        }
+    )
+    void should_flag_credentials_embedded_in_a_plain_http_repository_url(String repository) {
         GitFetcherConfiguration configuration = configuration(null, null);
-        configuration.setRepository("http://someone:s3cr3t-token@example.org/org/documentation.git");
+        configuration.setRepository(repository);
 
         assertThat(GitFetcher.sendsCredentialsInClearText(configuration)).isTrue();
     }
