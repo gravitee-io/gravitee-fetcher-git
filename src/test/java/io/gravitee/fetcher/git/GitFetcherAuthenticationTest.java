@@ -209,6 +209,20 @@ class GitFetcherAuthenticationTest {
     }
 
     @Test
+    void should_warn_without_leaking_a_password_that_contains_an_at_sign() throws Throwable {
+        String repositoryWithCredentials = publicRepositoryUri.replace("http://", "http://someone:s3cr3t@token@");
+        GitFetcher fetcher = new GitFetcher(configuration(repositoryWithCredentials, null, null));
+
+        List<ILoggingEvent> warnings = warningsLoggedDuring(() -> readAll(fetcher.fetch().getContent()));
+
+        assertThat(warnings)
+            .singleElement()
+            .extracting(ILoggingEvent::getFormattedMessage, as(STRING))
+            .contains("'" + publicRepositoryUri + "'")
+            .doesNotContain("s3cr3t", "token@");
+    }
+
+    @Test
     void should_not_warn_when_no_credentials_are_sent_over_plain_http() throws Throwable {
         GitFetcher fetcher = new GitFetcher(configuration(publicRepositoryUri, null, null));
 
