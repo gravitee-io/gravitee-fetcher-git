@@ -43,6 +43,7 @@ public class GitFetcher implements Fetcher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GitFetcher.class);
     private static final Pattern URL_CREDENTIALS = Pattern.compile("^([a-zA-Z][a-zA-Z0-9+.\\-]*://)[^/@]*@");
+    private static final List<String> SAFE_TRANSPORT_PREFIXES = List.of("https://", "ssh://", "git@", "file://");
     private static final List<String> AUTHENTICATION_FAILURE_HINTS = List.of(
         "not authorized",
         "authentication is required",
@@ -84,6 +85,13 @@ public class GitFetcher implements Fetcher {
             tmpDirectory.delete();
         } catch (IOException e) {
             throw new FetcherException("Unable to create temporary directory to fetch git repository", e);
+        }
+
+        if (sendsCredentialsInClearText(gitFetcherConfiguration)) {
+            LOGGER.warn(
+                "Credentials configured for repository '{}' will be sent unencrypted: use an https:// URL to protect them",
+                sanitizeRepository(gitFetcherConfiguration.getRepository())
+            );
         }
 
         // Track whether we successfully returned a stream so the finally block can clean up on error paths.
@@ -146,6 +154,18 @@ public class GitFetcher implements Fetcher {
             return null;
         }
         return new UsernamePasswordCredentialsProvider(username == null ? "" : username, password == null ? "" : password);
+    }
+
+    /**
+     * Whether the configured credentials would leave the gateway unencrypted. HTTPS and SSH protect them; a plain
+     * {@code http://} remote does not, and a local {@code file://} one sends nothing over the wire.
+     */
+    static boolean sendsCredentialsInClearText(GitFetcherConfiguration configuration) {
+        if (credentialsProvider(configuration) == null || configuration.getRepository() == null) {
+            return false;
+        }
+        String repository = configuration.getRepository().trim().toLowerCase(Locale.ROOT);
+        return SAFE_TRANSPORT_PREFIXES.stream().noneMatch(repository::startsWith);
     }
 
     private FetcherException toFetcherException(Exception e) {

@@ -71,6 +71,31 @@ class GitFetcherCredentialsTest {
     }
 
     @Test
+    void should_flag_credentials_sent_over_a_plain_http_repository() {
+        GitFetcherConfiguration configuration = configuration("publisher", "s3cr3t-token");
+        configuration.setRepository("http://example.org/org/documentation.git");
+
+        assertThat(GitFetcher.sendsCredentialsInClearText(configuration)).isTrue();
+    }
+
+    @Test
+    void should_not_flag_credentials_sent_over_an_encrypted_transport() {
+        assertThat(GitFetcher.sendsCredentialsInClearText(configuration("publisher", "s3cr3t-token"))).isFalse();
+
+        GitFetcherConfiguration overSsh = configuration("publisher", "s3cr3t-token");
+        overSsh.setRepository("git@example.org:org/documentation.git");
+        assertThat(GitFetcher.sendsCredentialsInClearText(overSsh)).isFalse();
+    }
+
+    @Test
+    void should_not_flag_a_plain_http_repository_fetched_without_credentials() {
+        GitFetcherConfiguration configuration = configuration(null, null);
+        configuration.setRepository("http://example.org/org/documentation.git");
+
+        assertThat(GitFetcher.sendsCredentialsInClearText(configuration)).isFalse();
+    }
+
+    @Test
     void should_expose_the_password_as_sensitive_so_that_apim_masks_it() throws Exception {
         assertThat(GitFetcherConfiguration.class.getDeclaredField("password").isAnnotationPresent(Sensitive.class)).isTrue();
         assertThat(GitFetcherConfiguration.class.getDeclaredField("username").isAnnotationPresent(Sensitive.class)).isFalse();
