@@ -149,7 +149,7 @@ public class GitFetcher implements Fetcher {
      */
     static CredentialsProvider credentialsProvider(GitFetcherConfiguration configuration) {
         String username = trimToNull(configuration.getUsername());
-        String password = trimToNull(configuration.getPassword());
+        String password = blankToNull(configuration.getPassword());
         if (username == null && password == null) {
             return null;
         }
@@ -218,6 +218,11 @@ public class GitFetcher implements Fetcher {
         }
         String trimmed = value.trim();
         return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    /** Unlike the username, a password is sent as typed: surrounding spaces can be part of it. */
+    private static String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value;
     }
 
     /** Accepts both path forms (with or without leading slash); never persisted back to the configuration. */
