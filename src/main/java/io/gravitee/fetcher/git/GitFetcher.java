@@ -156,14 +156,13 @@ public class GitFetcher implements Fetcher {
     }
 
     /**
-     * Whether the configured credentials would leave the gateway unencrypted. Only a plain {@code http://} remote sends
-     * them in clear text: HTTPS and SSH encrypt them, {@code git://} and local paths never send them.
+     * Whether the credentials, configured or embedded in the repository URL, would leave the gateway unencrypted. Only a
+     * plain {@code http://} remote sends them in clear text: HTTPS and SSH encrypt them, {@code git://} and local paths
+     * never send them.
      */
     static boolean sendsCredentialsInClearText(GitFetcherConfiguration configuration) {
-        if (credentialsProvider(configuration) == null || configuration.getRepository() == null) {
-            return false;
-        }
-        return configuration.getRepository().trim().toLowerCase(Locale.ROOT).startsWith("http://");
+        String repository = configuration.getRepository();
+        return repository != null && repository.trim().toLowerCase(Locale.ROOT).startsWith("http://") && hasCredentials(configuration);
     }
 
     private FetcherException toFetcherException(Exception e) {
@@ -172,7 +171,7 @@ public class GitFetcher implements Fetcher {
         }
 
         String repository = sanitizeRepository(gitFetcherConfiguration.getRepository());
-        if (hasCredentials()) {
+        if (hasCredentials(gitFetcherConfiguration)) {
             return new FetcherException(
                 "Unable to fetch git content: authentication failed for repository '" +
                     repository +
@@ -187,9 +186,9 @@ public class GitFetcher implements Fetcher {
     }
 
     /** Credentials carried by the repository URL (https://user:token@host/...) are credentials too. */
-    private boolean hasCredentials() {
-        String repository = gitFetcherConfiguration.getRepository();
-        return credentialsProvider(gitFetcherConfiguration) != null || (repository != null && URL_CREDENTIALS.matcher(repository).find());
+    private static boolean hasCredentials(GitFetcherConfiguration configuration) {
+        String repository = configuration.getRepository();
+        return credentialsProvider(configuration) != null || (repository != null && URL_CREDENTIALS.matcher(repository).find());
     }
 
     /**

@@ -18,11 +18,12 @@ package io.gravitee.fetcher.git;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.gravitee.fetcher.api.Sensitive;
-import java.util.List;
 import org.eclipse.jgit.transport.CredentialItem;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.URIish;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * How the configured credentials are turned into JGit credentials, including the token-only form accepted by most
@@ -71,48 +72,43 @@ class GitFetcherCredentialsTest {
         assertThat(passwordOf(provider)).isEmpty();
     }
 
-    @Test
-    void should_flag_credentials_sent_over_a_plain_http_repository() {
+    @ParameterizedTest
+    @ValueSource(strings = { "http://example.org/org/documentation.git", " HTTP://example.org/org/documentation.git" })
+    void should_flag_configured_credentials_sent_over_a_plain_http_repository(String repository) {
         GitFetcherConfiguration configuration = configuration("publisher", "s3cr3t-token");
-        configuration.setRepository("http://example.org/org/documentation.git");
+        configuration.setRepository(repository);
 
         assertThat(GitFetcher.sendsCredentialsInClearText(configuration)).isTrue();
     }
 
     @Test
-    void should_flag_credentials_sent_over_a_plain_http_repository_whatever_the_case() {
-        GitFetcherConfiguration configuration = configuration("publisher", "s3cr3t-token");
-        configuration.setRepository(" HTTP://example.org/org/documentation.git");
+    void should_flag_credentials_embedded_in_a_plain_http_repository_url() {
+        GitFetcherConfiguration configuration = configuration(null, null);
+        configuration.setRepository("http://someone:s3cr3t-token@example.org/org/documentation.git");
 
         assertThat(GitFetcher.sendsCredentialsInClearText(configuration)).isTrue();
     }
 
-    @Test
-    void should_not_flag_credentials_sent_over_an_encrypted_transport() {
-        assertThat(GitFetcher.sendsCredentialsInClearText(configuration("publisher", "s3cr3t-token"))).isFalse();
+    @ParameterizedTest
+    @ValueSource(
+        strings = {
+            "https://example.org/org/documentation.git",
+            "https://someone:s3cr3t-token@example.org/org/documentation.git",
+            "ssh://git@example.org/org/documentation.git",
+            "git+ssh://git@example.org/org/documentation.git",
+            "git@example.org:org/documentation.git",
+            "deploy@example.org:org/documentation.git",
+            "example.org:org/documentation.git",
+            "git://example.org/org/documentation.git",
+            "file:///srv/git/documentation.git",
+            "/srv/git/documentation.git",
+        }
+    )
+    void should_not_flag_a_repository_that_does_not_send_credentials_in_clear_text(String repository) {
+        GitFetcherConfiguration configuration = configuration("publisher", "s3cr3t-token");
+        configuration.setRepository(repository);
 
-        GitFetcherConfiguration overSsh = configuration("publisher", "s3cr3t-token");
-        overSsh.setRepository("git@example.org:org/documentation.git");
-        assertThat(GitFetcher.sendsCredentialsInClearText(overSsh)).isFalse();
-    }
-
-    @Test
-    void should_not_flag_a_repository_that_does_not_send_credentials_in_clear_text() {
-        assertThat(
-            List.of(
-                "ssh://git@example.org/org/documentation.git",
-                "git+ssh://git@example.org/org/documentation.git",
-                "deploy@example.org:org/documentation.git",
-                "example.org:org/documentation.git",
-                "git://example.org/org/documentation.git",
-                "file:///srv/git/documentation.git",
-                "/srv/git/documentation.git"
-            )
-        ).allSatisfy(repository -> {
-            GitFetcherConfiguration configuration = configuration("publisher", "s3cr3t-token");
-            configuration.setRepository(repository);
-            assertThat(GitFetcher.sendsCredentialsInClearText(configuration)).as(repository).isFalse();
-        });
+        assertThat(GitFetcher.sendsCredentialsInClearText(configuration)).isFalse();
     }
 
     @Test
