@@ -1,3 +1,19 @@
+# [3.1.0](https://github.com/gravitee-io/gravitee-fetcher-git/compare/3.0.1...3.1.0) (2026-09-24)
+
+
+### Bug Fixes
+
+* **git-fetcher:** fully strip URL credentials from messages and logs ([44e4c4e](https://github.com/gravitee-io/gravitee-fetcher-git/commit/44e4c4ec6e409c181b25adf1d4903cad94dc4461))
+* **git-fetcher:** only warn about cleartext credentials on http:// ([eb008d6](https://github.com/gravitee-io/gravitee-fetcher-git/commit/eb008d6dd421aef4a11cb411804e2f6fde76a016))
+* **git-fetcher:** send the configured password without trimming it ([14332cd](https://github.com/gravitee-io/gravitee-fetcher-git/commit/14332cd6e73a0dcdce76dff0faa487e094220c49))
+* **git-fetcher:** warn on cleartext URL credentials and test the warning ([6daa41f](https://github.com/gravitee-io/gravitee-fetcher-git/commit/6daa41f0ba8cd949e6121b8acb386fde5d12f127))
+
+
+### Features
+
+* **git-fetcher:** authenticate against private repositories ([5f43de7](https://github.com/gravitee-io/gravitee-fetcher-git/commit/5f43de7d7e5d4c5a0916e6b1da0676a82d02a099))
+* **git-fetcher:** warn when credentials would travel unencrypted ([adad0d6](https://github.com/gravitee-io/gravitee-fetcher-git/commit/adad0d63158c5985006e65481eaf0af8f07355b3))
+
 ## [3.0.1](https://github.com/gravitee-io/gravitee-fetcher-git/compare/3.0.0...3.0.1) (2026-07-20)
 
 
